@@ -20,33 +20,39 @@ RUN groupadd -g 1000 appuser && useradd -u 1000 -g appuser -m appuser
 # 6. Define diretório de trabalho
 WORKDIR /var/www/html
 
-# Copia todo o código primeiro (incluindo artisan)
+# 7. Copia todo o código da aplicação (incluindo artisan)
 COPY . .
 
-# Ajusta permissões para usuário appuser
+# 8. Ajusta permissões para usuário appuser
 RUN chown -R appuser:appuser /var/www/html
 
+# 9. Muda para usuário não-root para rodar composer
 USER appuser
 
-# Agora roda composer install com o código já presente
+# 10. Instala dependências PHP do Laravel (como appuser)
 RUN composer install --no-dev --optimize-autoloader
 
+# 11. Volta para root para continuar a build
 USER root
 
-# 13. Instala dependências do Node e compila os assets com Vite
+# 12. Instala dependências do Node e compila os assets com Vite
 RUN npm install && npm run build
 
-# 14. Ajusta permissões para storage e cache (para www-data)
+# 13. Ajusta permissões para storage e cache (para www-data)
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# 15. Copia configuração do Nginx customizada
+# 14. Copia configuração do Nginx customizada
 COPY ./docker/nginx.conf /etc/nginx/sites-available/default
 
-# 16. Copia configuração do Supervisor para rodar nginx + php-fpm
+# 15. Copia configuração do Supervisor para rodar nginx + php-fpm
 COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# 16. Copia script deploy que roda migrate, seed e inicia supervisord
+COPY deploy.sh /usr/local/bin/deploy.sh
+RUN chmod +x /usr/local/bin/deploy.sh
 
 # 17. Expõe a porta HTTP usada no container
 EXPOSE 80
 
-# 18. Comando padrão para iniciar nginx + php-fpm usando Supervisor
-CMD ["supervisord", "-n"]
+# 18. Comando padrão para iniciar o container (executa deploy.sh)
+CMD ["/usr/local/bin/deploy.sh"]
