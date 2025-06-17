@@ -1,0 +1,21 @@
+{
+    "name": "Finance Control",
+    "short_name": "Finance",
+    "description": "Um App que ajuda gerir as suas finanças",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#4F46E5",
+    "icons": [
+        {
+            "src": "public/images/icon_mini.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "public/images/icon_mini.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

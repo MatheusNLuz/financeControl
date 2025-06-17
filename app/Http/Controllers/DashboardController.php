@@ -12,66 +12,86 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user();
+        try {
+            $user = auth()->user();
 
-        // Carteiras do usuário
-        $accounts = $user->accounts()->get(['accounts.id', 'accounts.name']);
+            $accounts = $user->accounts()->get(['accounts.id', 'accounts.name']);
 
-        // Seleciona uma carteira (via request ou a primeira)
-        $activeAccountId = $request->get('account_id') ?? $accounts->first()?->id;
+            if ($accounts->isEmpty()) {
+                return Inertia::render('dashboard', [
+                    'accounts' => [],
+                    'activeAccountId' => null,
+                    'summary' => [
+                        'entradas' => "0,00",
+                        'saidas' => "0,00",
+                        'saldo' => "0,00",
+                    ],
+                    'saldoDiario' => [],
+                    'evolucaoMensal' => [],
+                    'transactions' => [],
+                    'categories' => Category::all(['id', 'name', 'type']),
+                ]);
+            }
 
-        /** @var Account|null $account */
-        $account = $user->accounts()->with('transactions')->find($activeAccountId);
+            $activeAccountId = $request->get('account_id') ?? $accounts->first()?->id;
 
-        if (!$account) {
-            return to_route('dashboard')->with('error', 'Carteira não encontrada');
-        }
+            /** @var Account|null $account */
+            $account = $user->accounts()->with('transactions')->find($activeAccountId);
 
-        // Transações
-        $transactions = $account->transactions()
-            ->orderByDesc('date')
-            ->limit(10)
-            ->get(['id', 'description', 'amount', 'type', 'date']);
+            if (!$account) {
+                return to_route('dashboard')->with('error', 'Carteira não encontrada');
+            }
 
-        // Cálculo dos totais
-        $entradas = $account->transactions()->where('type', 'receita')->sum('amount');
-        $saidas = $account->transactions()->where('type', 'despesa')->sum('amount');
-        $saldo = $entradas - $saidas;
+            $transactions = $account->transactions()
+                ->with('category:id,name,icon', 'user:id,name')
+                ->orderByDesc('date')
+                ->limit(10)
+                ->get(['id', 'description', 'amount', 'type', 'date', 'category_id', 'user_id']);
 
-        // Exemplo de agrupamento para gráficos
-        $saldoDiario = $account->transactions()
-            ->selectRaw("DATE(date) as dia, SUM(CASE WHEN type = 'receita' THEN amount ELSE -amount END) as saldo")
-            ->groupByRaw("DATE(date)")
-            ->orderBy('dia')
-            ->get()
-            ->map(fn($item) => ['dia' => date('d/m', strtotime($item->dia)), 'saldo' => (float)$item->saldo]);
+            $entradas = $account->transactions()->where('type', 'receita')->sum('amount');
+            $saidas = $account->transactions()->where('type', 'despesa')->sum('amount');
+            $saldo = $entradas - $saidas;
 
-        $evolucaoMensal = $account->transactions()
-            ->selectRaw("DATE_FORMAT(date, '%b') as mes,
-                     SUM(CASE WHEN type = 'receita' THEN amount ELSE 0 END) as entradas,
-                     SUM(CASE WHEN type = 'despesa' THEN amount ELSE 0 END) as saidas")
-            ->groupByRaw("DATE_FORMAT(date, '%b')")
-            ->orderByRaw("MIN(date)")
-            ->get()
-            ->map(fn($item) => [
-                'mes' => $item->mes,
-                'entradas' => (float)$item->entradas,
-                'saidas' => (float)$item->saidas,
+            $saldoDiario = $account->transactions()
+                ->selectRaw("DATE(date) as dia, SUM(CASE WHEN type = 'receita' THEN amount ELSE -amount END) as saldo")
+                ->groupByRaw("DATE(date)")
+                ->orderBy('dia')
+                ->get()
+                ->map(fn($item) => [
+                    'dia' => date('d/m', strtotime($item->dia)),
+                    'saldo' => (float)$item->saldo,
+                ]);
+
+            $evolucaoMensal = $account->transactions()
+                ->selectRaw("DATE_FORMAT(date, '%b') as mes,
+                SUM(CASE WHEN type = 'receita' THEN amount ELSE 0 END) as entradas,
+                SUM(CASE WHEN type = 'despesa' THEN amount ELSE 0 END) as saidas")
+                ->groupByRaw("DATE_FORMAT(date, '%b')")
+                ->orderByRaw("MIN(date)")
+                ->get()
+                ->map(fn($item) => [
+                    'mes' => $item->mes,
+                    'entradas' => (float)$item->entradas,
+                    'saidas' => (float)$item->saidas,
+                ]);
+
+            return Inertia::render('dashboard', [
+                'accounts' => $accounts,
+                'activeAccountId' => $account->id,
+                'summary' => [
+                    'entradas' => number_format($entradas, 2, ',', '.'),
+                    'saidas' => number_format($saidas, 2, ',', '.'),
+                    'saldo' => number_format($saldo, 2, ',', '.'),
+                ],
+                'saldoDiario' => $saldoDiario,
+                'evolucaoMensal' => $evolucaoMensal,
+                'transactions' => $transactions,
+                'categories' => Category::all(['id', 'name', 'type']),
+                'role' => $account->pivot->role,
             ]);
-
-        return Inertia::render('dashboard', [
-            'accounts' => $accounts,
-            'activeAccountId' => $account->id,
-            'summary' => [
-                'entradas' => $entradas,
-                'saidas' => $saidas,
-                'saldo' => $saldo,
-            ],
-            'saldoDiario' => $saldoDiario,
-            'evolucaoMensal' => $evolucaoMensal,
-            'transactions' => $transactions,
-            'categories' => Category::all(['id', 'name', 'type']), // 👈 Aqui está a adição
-        ]);
+        } catch (\Exception $exception) {
+            return Inertia::render('dashboard');
+        }
     }
 
 }

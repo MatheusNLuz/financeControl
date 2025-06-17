@@ -10,27 +10,43 @@ class DefaultCategorySeeder extends Seeder
     public function run()
     {
         $categoriasReceita = [
-            'Salário', 'Criptomoeda', 'Fundo Imobiliário', 'Outros'
+            ['name' => 'Salário', 'icon' => 'Briefcase'],
+            ['name' => 'Criptomoeda', 'icon' => 'Bitcoin'],
+            ['name' => 'Fundo Imobiliário', 'icon' => 'Landmark'],
+            ['name' => 'Pix/TED', 'icon' => 'Banknote'],
+            ['name' => 'Outros', 'icon' => 'MessageCircleMore'],
         ];
 
         $categoriasDespesa = [
-            'Alimentação', 'Moradia', 'Transporte', 'Lazer',
-            'Saúde', 'Educação', 'Criptomoeda', 'Fundo Imobiliário', 'Outros'
+            ['name' => 'Alimentação', 'icon' => 'ShoppingBasket'],
+            ['name' => 'Moradia', 'icon' => 'Home'],
+            ['name' => 'Transporte', 'icon' => 'Car'],
+            ['name' => 'Lazer', 'icon' => 'Gamepad2'],
+            ['name' => 'Contas domésticas', 'icon' => 'ReceiptText'],
+            ['name' => 'Internet', 'icon' => 'Wifi'],
+            ['name' => 'Seguro', 'icon' => 'ShieldCheck'],
+            ['name' => 'Saúde', 'icon' => 'HeartPulse'],
+            ['name' => 'Educação', 'icon' => 'BookOpenText'],
+            ['name' => 'Criptomoeda', 'icon' => 'Bitcoin'],
+            ['name' => 'Fundo Imobiliário', 'icon' => 'Landmark'],
+            ['name' => 'Pix/TED', 'icon' => 'Banknote'],
+            ['name' => 'Outros', 'icon' => 'MessageCircleMore'],
         ];
 
-        foreach ($categoriasReceita as $nome) {
+        foreach ($categoriasReceita as $categoria) {
             Category::create([
-                'name' => $nome,
-                'type' => 'receita'
+                'name' => $categoria['name'],
+                'type' => 'receita',
+                'icon' => $categoria['icon'],
             ]);
         }
 
-        foreach ($categoriasDespesa as $nome) {
+        foreach ($categoriasDespesa as $categoria) {
             Category::create([
-                'name' => $nome,
-                'type' => 'despesa'
+                'name' => $categoria['name'],
+                'type' => 'despesa',
+                'icon' => $categoria['icon'],
             ]);
         }
     }
 }
-

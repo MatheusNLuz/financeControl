@@ -48,12 +48,18 @@ export type Transaction = {
     amount: number;
     type: 'receita' | 'despesa';
     date: string;
+    category: Category
+    user: {
+        name: string,
+        id: number,
+    }
 };
 
 export type Category = {
     id: number;
     name: string;
     type: 'receita' | 'despesa';
+    icon: string
 };
 
 export type Account = {
@@ -68,7 +74,7 @@ export type Summary = {
 };
 
 export type SaldoDiarioItem = {
-    dia: string; // exemplo: "01", "15", etc.
+    dia: string;
     saldo: number;
 };
 
@@ -80,6 +86,7 @@ export type EvolucaoMensalItem = {
 
 export interface PageProps {
     accounts: Account[];
+    role: string,
     activeAccountId: number | null;
     summary: Summary;
     saldoDiario: SaldoDiarioItem[];

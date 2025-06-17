@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('icon')->nullable();
-            $table->enum('type', ['receita', 'despesa']);
-            $table->timestamps();
+        Schema::table('account_invitations', function (Blueprint $table) {
+            $table->string('role')->default('visualizador');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::table('account_invitations', function (Blueprint $table) {
+            //
+        });
     }
 };

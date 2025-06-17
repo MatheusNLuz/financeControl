@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('account_id')->constrained('accounts');
-            $table->foreignId('category_id')->constrained('categories');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('account_id')->constrained('accounts')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
             $table->enum('type', ['receita', 'despesa']);
             $table->decimal('amount', 15, 2);
             $table->string('description')->nullable();
