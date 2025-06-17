@@ -20,23 +20,18 @@ RUN groupadd -g 1000 appuser && useradd -u 1000 -g appuser -m appuser
 # 6. Define diretório de trabalho
 WORKDIR /var/www/html
 
-# 7. Copia apenas arquivos do Composer para instalar dependências em cache
-COPY composer.json composer.lock ./
+# Copia todo o código primeiro (incluindo artisan)
+COPY . .
 
-# 8. Ajusta permissão para appuser antes de rodar composer
+# Ajusta permissões para usuário appuser
 RUN chown -R appuser:appuser /var/www/html
 
-# 9. Muda para usuário não-root para rodar composer
 USER appuser
 
-# 10. Instala dependências PHP do Laravel (como appuser)
+# Agora roda composer install com o código já presente
 RUN composer install --no-dev --optimize-autoloader
 
-# 11. Volta para root para continuar a build
 USER root
-
-# 12. Copia todo o restante do código da aplicação
-COPY . .
 
 # 13. Instala dependências do Node e compila os assets com Vite
 RUN npm install && npm run build
