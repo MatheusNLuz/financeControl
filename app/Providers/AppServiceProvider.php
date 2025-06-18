@@ -26,9 +26,11 @@ class AppServiceProvider extends ServiceProvider
                 return [
                     'success' => session('success'),
                     'error' => session('error'),
+                    'invitationToken' => session('invitationToken'),
                 ];
 
             },
+            'appUrl' => config('app.url'),
         ]);
 
         if (app()->environment('production')) {

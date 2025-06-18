@@ -2,7 +2,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,9 +27,9 @@ import {
     Trash2,
     TrendingUp,
     WalletCards,
-    WalletMinimalIcon,
+    WalletMinimalIcon
 } from 'lucide-react';
-import type { ElementType } from 'react';
+import { ElementType, useState } from 'react';
 import React from 'react';
 import CurrencyInput from 'react-currency-input-field';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from 'recharts';
@@ -68,6 +76,8 @@ export default function Dashboard() {
         },
     };
 
+    const [copied, setCopied] = useState(false);
+
     const categoriasFiltradas = categories.filter((cat: Category) => cat.type === data.type);
 
     const mensalConfig: ChartConfig = {
@@ -112,7 +122,23 @@ export default function Dashboard() {
 
     const { flash, errors: backendErrors } = usePage<PageProps>().props;
     const successMessage = flash?.success;
+    const invitationToken = flash?.invitationToken;
     const getInitials = useInitials();
+    const { appUrl } = usePage().props;
+
+    const conviteLink = `${appUrl}/invites/accept/${invitationToken}`;
+
+    const handleCopy = async () => {
+        try {
+            await navigator.clipboard.writeText(conviteLink);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Erro ao copiar o link:", err);
+        }
+    };
+
+
 
     const hasAccounts = accounts.length > 0;
     return (
@@ -122,7 +148,18 @@ export default function Dashboard() {
                 {successMessage && (
                     <Alert variant="success" className="mb-4">
                         <AlertTitle>Sucesso!</AlertTitle>
-                        <AlertDescription>{successMessage}</AlertDescription>
+                        <AlertDescription>
+                            {successMessage}
+                            {invitationToken && (
+                                <p className='text-sm'>
+                                    Por motivos, os emails não estão sendo enviados. Copie o link e encaminhe para a pessoa desejada: <br />
+                                    <code className='block bg-gray-100 px-3 py-2 rounded text-sm break-all'>{conviteLink} <Button size="sm" onClick={handleCopy}>
+                                        {copied ? "Link copiado!" : "Copiar link"}
+                                    </Button></code>
+
+                                </p>
+                            )}
+                        </AlertDescription>
                     </Alert>
                 )}
 

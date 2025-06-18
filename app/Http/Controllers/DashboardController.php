@@ -88,6 +88,7 @@ class DashboardController extends Controller
                 'transactions' => $transactions,
                 'categories' => Category::all(['id', 'name', 'type']),
                 'role' => $account->pivot->role,
+                'invitationToken' => session()->get('invitationToken')
             ]);
         } catch (\Exception $exception) {
             return Inertia::render('dashboard');

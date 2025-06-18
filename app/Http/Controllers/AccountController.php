@@ -22,11 +22,13 @@ class AccountController extends Controller
     public function store(Request $request)
     {
         try {
+            $invitationToken = null;
+
             $request->validate([
                 'name' => 'required|string|max:255',
                 'type' => 'required|in:pessoal,compartilhada,investimento',
                 'shared_email' => 'required_if:type,compartilhada|nullable|email|exists:users,email',
-                'shared_role' => 'required_if:type,compartilhada|nullable|in:editor,visualizado'
+                'shared_role' => 'required_if:type,compartilhada|nullable|in:editor,visualizador'
             ], [
                 'name.required' => 'O nome da carteira é obrigatório.',
                 'name.string' => 'O nome da carteira deve ser um texto.',
@@ -59,10 +61,15 @@ class AccountController extends Controller
                     ]);
 
                     Mail::to($sharedUser->email)->send(new SharedAccountInvitation($account->name, $invitation->token));
+
+                    $invitationToken = (string) $invitation->token;
                 }
             }
 
-            return redirect()->route('dashboard')->with('success', 'Conta criada com sucesso!');
+            return redirect()->route('dashboard')->with([
+                'success' => 'Conta criada com sucesso!',
+                'invitationToken' => $invitationToken
+            ]);
         } catch (ValidationException $exception) {
             return redirect()->back()->withErrors($exception->errors());
         }

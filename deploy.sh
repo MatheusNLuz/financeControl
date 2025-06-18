@@ -2,7 +2,7 @@
 php artisan migrate --force
 
 # Roda o seeder que desejar
-php artisan db:seed --class=DefaultCategorySeeder --force
+#php artisan db:seed --class=DefaultCategorySeeder --force
 
 # Instala dependências JS e compila com Vite
 npm install --omit=dev
