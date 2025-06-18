@@ -35,9 +35,6 @@ RUN composer install --no-dev --optimize-autoloader
 # 11. Volta para root para continuar a build
 USER root
 
-# 12. Instala dependências do Node e compila os assets com Vite
-RUN npm install --omit=dev && npm run build
-
 # 13. Ajusta permissões para storage e cache (para www-data)
 RUN chown -R www-data:www-data storage bootstrap/cache
 
