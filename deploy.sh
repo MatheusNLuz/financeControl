@@ -6,7 +6,6 @@ php artisan db:seed --class=DefaultCategorySeeder --force
 
 # Instala dependências JS e compila com Vite
 npm install --omit=dev
-npm run build
 
 php artisan config:clear
 php artisan cache:clear
