@@ -63,10 +63,10 @@ class DashboardController extends Controller
                 ]);
 
             $evolucaoMensal = $account->transactions()
-                ->selectRaw("DATE_FORMAT(date, '%b') as mes,
+                ->selectRaw("to_char(date, 'Mon') as mes,
                 SUM(CASE WHEN type = 'receita' THEN amount ELSE 0 END) as entradas,
                 SUM(CASE WHEN type = 'despesa' THEN amount ELSE 0 END) as saidas")
-                ->groupByRaw("DATE_FORMAT(date, '%b')")
+                ->groupByRaw("to_char(date, 'Mon')")
                 ->orderByRaw("MIN(date)")
                 ->get()
                 ->map(fn($item) => [
