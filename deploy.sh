@@ -8,6 +8,11 @@ php artisan db:seed --class=DefaultCategorySeeder --force
 npm install --omit=dev
 npm run build
 
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
 # Finalmente, inicia o supervisor no foreground para manter o container rodando
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 

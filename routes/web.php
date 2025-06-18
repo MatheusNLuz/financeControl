@@ -25,5 +25,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/invites/accept/{token}', [AccountInvitationController::class, 'accept'])->name('invites.accept');
 });
 
+Route::get('/debug-log', function() {
+    return nl2br(file_get_contents(storage_path('logs/laravel.log')));
+});
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
